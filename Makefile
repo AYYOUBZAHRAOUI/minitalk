@@ -10,13 +10,13 @@ NAME_SERVER = server
 all: $(NAME) $(NAME_SERVER)
 
 $(NAME): $(SRC_CLIENT)
-	$(CC) $(CFLAGS) -o $(NAME) $(SRC_CLIENT)
+	$(CC) $(CFLAGS) $(SRC_CLIENT) -o $(NAME)
 
 $(NAME_SERVER): $(SRC_SERVER)
-	$(CC) $(CFLAGS) -o $(NAME_SERVER) $(SRC_SERVER)
+	$(CC) $(CFLAGS) $(SRC_SERVER) -o $(NAME_SERVER)
 
 clean:
-	rm -f $(OBJ_CLIENT) $(OBJ_SERVER)
+	@echo "No Object file in this program"
 
 fclean: clean
 	rm -f $(NAME) $(NAME_SERVER)

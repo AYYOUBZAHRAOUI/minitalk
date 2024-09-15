@@ -6,24 +6,42 @@
 /*   By: ayzahrao <ayzahrao@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 23:34:47 by ayzahrao          #+#    #+#             */
-/*   Updated: 2024/09/14 00:45:16 by ayzahrao         ###   ########.fr       */
+/*   Updated: 2024/09/14 22:07:06 by ayzahrao         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes/minitalk.h"
-/*
-	-- the server file --
-// the server print PID
-// the server wile receive a signals SIGUSER1 SIGUSER2
-* how to receive a signal >> use signal function
-* how to 
-*/
 
-void signal_handler(int x, int pidclient)
+//	print integers
+static void	putint(int pid)
 {
-	static char c = 0 ;
-	static int bit_position;
-	static pid;
+	if (pid / 10)
+		putint(pid / 10);
+	write(1, ("0123456789") + (pid % 10), 1);
+}
+
+//	print pid of the server
+static void	print_pid(int pid)
+{
+	write(1, "--------- SERVER PID ", 21);
+	putint(pid);
+	write(1, " ---------\n", 11);
+}
+
+// signal handler
+static void	signal_handler(int x, siginfo_t *info, void *param)
+{
+	static char	c;
+	static int	bit_position;
+	static int	pid;
+
+	(void)param;
+	if (pid != info->si_pid)
+	{
+		bit_position = 0;
+		c = 0;
+	}
+	pid = info->si_pid;
 	if (x == SIGUSR1)
 		c = c | (1 << bit_position);
 	bit_position++;
@@ -35,12 +53,19 @@ void signal_handler(int x, int pidclient)
 	}
 }
 
-
-int main(void)
+// main function
+int	main(void)
 {
-	sigaction(SIGUSR1, signal_handler);
-	signal(SIGUSR2, signal_handler);
-	printf("PID OF the SERVER IS :%i\n", getpid());
-	while (1);
-	return(0);
+	struct sigaction	sa;
+
+	sa.sa_sigaction = signal_handler;
+	sa.sa_flags = SA_SIGINFO;
+	if (sigaction(SIGUSR1, &sa, NULL) == -1)
+		exit(write(2, "sigaction error \n", 17));
+	if (sigaction(SIGUSR2, &sa, NULL) == -1)
+		exit(write(2, "sigaction error \n", 17));
+	print_pid(getpid());
+	while (1)
+		;
+	return (0);
 }
